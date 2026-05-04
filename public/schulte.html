@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Schulte Table</title>
+    <script src="../dist/schulte.js" defer></script>
+    <style>
+        body {
+            background-color: #1d2021;
+            color: #ebdbb2;
+            font-family: sans-serif;
+        }
+
+        input,
+        label,
+        span,
+        button {
+            color: #ebdbb2;
+        }
+
+        input[type="number"],
+        input[type="range"] {
+            background-color: #282828;
+            color: #ebdbb2;
+            border: 1px solid #928374;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        button {
+            background-color: #282828;
+            color: #ebdbb2;
+            border: 1px solid #928374;
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3a3f4b;
+        }
+
+        td {
+            cursor: pointer;
+            user-select: none;
+            border-radius: 6px;
+            transition: background 0.15s ease, transform 0.1s ease;
+            text-align: center;
+            background-color: #282828;
+            color: #ebdbb2;
+            width: var(--cell-size, 60px);
+            height: var(--cell-size, 60px);
+            padding: 0;
+        }
+
+        td.past {
+            background-color: #202020;
+            color: #bfae95;
+        }
+
+        td:hover {
+            background: #3a3f4b;
+        }
+
+        td:active {
+            background: #928374;
+            transform: scale(0.97);
+        }
+
+        #grid {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <label for="rows">Rows: </label>
+    <input id="rows" type="number" min="1" step="1" value="5"></input>
+    <label for="cols">Columns: </label>
+    <input id="cols" type="number" min="1" step="1" value="5"></input>
+    <button type="button" id="fill_grid">Expand max</button>
+    <br>
+    <input id="randomize" type="checkbox"></input>
+    <label for="randomize">Randomize after each click</label>
+    <input id="colorize" type="checkbox"></input>
+    <label for="colorize">Colorize</label>
+    <input type="checkbox" id="disable_past"></input>
+    <label for="disable_past">Disable past</label>
+    <br>
+    <label for="padding_bar">Padding(%): </label>
+    <input type="range" min="0" max="100" step="0.1" value="2" id="padding_bar"></input>
+    <input type="number" min="0" max="100" step="0.1" value="2" id="padding"></input>
+    <br>
+    <span>Next number: <span id="next_n"></span></span>
+    <span>Record time: <span id="record"></span></span>
+    <span>Current time: <span id="curr_time"></span></span>
+    <button type="button" onclick="restart()">Restart</button>
+
+    <table id="grid">
+    </table>
+</body>
+
+</html>
