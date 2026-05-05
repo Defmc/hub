@@ -9,9 +9,11 @@ export default class GridConfig extends HTMLElement {
     grid!: HTMLTableElement
     cellGen: (gc: GridConfig, td: HTMLTableCellElement, i: number) => void = (_a, _b, _c) => { }
     fontSize!: HTMLInputElement
+    tds: HTMLTableCellElement[]
 
     constructor() {
         super()
+        this.tds = [];
     }
 
     el = <K extends keyof HTMLElementTagNameMap>(tag: K, props: Partial<HTMLElementTagNameMap[K]>): HTMLElementTagNameMap[K] => Object.assign(document.createElement(tag), props);
@@ -67,7 +69,6 @@ export default class GridConfig extends HTMLElement {
         this.setGridPadding(this.padding.valueAsNumber);
     }
 
-
     public setGridPadding = (p: number) => {
         const perCell = (p / 100) * window.innerWidth / this.cols.valueAsNumber;
         this.grid.style.setProperty('--cell-size', `${perCell}px`);
@@ -75,21 +76,23 @@ export default class GridConfig extends HTMLElement {
 
     public setGridSize = (): void => {
         const [cols, rows] = [this.cols.valueAsNumber, this.rows.valueAsNumber];
+        this.tds = [];
 
-        const genRow = (i: number): HTMLTableRowElement => {
+        const genRow = (): HTMLTableRowElement => {
             const tr = document.createElement('tr');
-            const cells = [...Array(cols).keys()].map(j => genCell(i * cols + j + 1));
+            const cells = [...Array(cols).keys()].map(_ => genCell());
             tr.append(...cells);
+            this.tds.push(...cells);
             return tr;
         };
-        const genCell = (num: number): HTMLTableCellElement => {
+        const genCell = (): HTMLTableCellElement => {
             const td = document.createElement('td');
             td.textContent = num.toString();
             td.style.fontSize = `${this.fontSize.valueAsNumber}px`;
             return td
         }
 
-        const newRows = [...Array(rows).keys()].flatMap(i => genRow(i));
+        const newRows = [...Array(rows).keys()].flatMap(_ => genRow());
         this.grid.replaceChildren(...newRows);
     }
 
@@ -108,9 +111,8 @@ export default class GridConfig extends HTMLElement {
 
             return shuffled;
         }
-        const tds = Array.from(this.grid.querySelectorAll('td')) as HTMLTableCellElement[];
         const order = fisherYateShuffle(this.rows.valueAsNumber * this.cols.valueAsNumber);
-        tds.forEach((td, i) => {
+        this.tds.forEach((td, i) => {
             this.cellGen(this, td, order[i])
         })
     }
