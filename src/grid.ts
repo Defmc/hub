@@ -1,3 +1,5 @@
+import Debounce from './debounce.js';
+
 export default class GridConfig extends HTMLElement {
     rows!: HTMLInputElement
     cols!: HTMLInputElement
@@ -60,7 +62,8 @@ export default class GridConfig extends HTMLElement {
             }
         })
 
-        window.addEventListener('resize', () => this.setGridPadding(this.padding.valueAsNumber));
+        const resizeBounce = Debounce(() => this.setGridPadding(this.padding.valueAsNumber), 200);
+        window.addEventListener('resize', resizeBounce);
         this.setGridPadding(this.padding.valueAsNumber);
     }
 
