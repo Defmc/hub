@@ -5,7 +5,7 @@ export default class GridConfig extends HTMLElement {
     padding!: HTMLInputElement
     paddingBar!: HTMLInputElement
     grid!: HTMLTableElement
-    cellGen!: (gc: GridConfig, td: HTMLTableCellElement, i: number) => void
+    cellGen: (gc: GridConfig, td: HTMLTableCellElement, i: number) => void = (_a, _b, _c) => { }
     fontSize!: HTMLInputElement
 
     constructor() {
