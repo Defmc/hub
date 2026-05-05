@@ -6,6 +6,7 @@ export default class GridConfig extends HTMLElement {
     paddingBar!: HTMLInputElement
     grid!: HTMLTableElement
     cellGen!: (gc: GridConfig, td: HTMLTableCellElement, i: number) => void
+    fontSize!: HTMLInputElement
 
     constructor() {
         super()
@@ -21,6 +22,7 @@ export default class GridConfig extends HTMLElement {
         <br>
         <label>Padding (%) <input type="range" min="0" max="100" value="20" step="1"></label>
         <input type="number" min="0" max="100" value="20" step="1">
+        <label>Font size(px) <input type="number" min="0" value="12" step="1"></label>
         <table></table>
     `;
 
@@ -29,6 +31,7 @@ export default class GridConfig extends HTMLElement {
         this.cols = inputs[1];
         this.paddingBar = inputs[2];
         this.padding = inputs[3];
+        this.fontSize = inputs[4];
         this.expand = this.querySelector('button')!;
         this.grid = this.querySelector('table')!;
 
@@ -51,6 +54,12 @@ export default class GridConfig extends HTMLElement {
             this.setGridPadding(this.padding.valueAsNumber);
         }
 
+        this.fontSize.addEventListener('change', () => {
+            for (const cell of this.grid.querySelectorAll('td')) {
+                cell.style.fontSize = `${this.fontSize.valueAsNumber}px`;
+            }
+        })
+
         window.addEventListener('resize', () => this.setGridPadding(this.padding.valueAsNumber));
         this.setGridPadding(this.padding.valueAsNumber);
     }
@@ -64,11 +73,6 @@ export default class GridConfig extends HTMLElement {
     public setGridSize = (): void => {
         const [cols, rows] = [this.cols.valueAsNumber, this.rows.valueAsNumber];
 
-        const currRows = this.grid.querySelectorAll('tr').length;
-        if (currRows == rows && this.grid.querySelectorAll('td').length == currRows * cols) {
-            return;
-        }
-
         const genRow = (i: number): HTMLTableRowElement => {
             const tr = document.createElement('tr');
             const cells = [...Array(cols).keys()].map(j => genCell(i * cols + j + 1));
@@ -76,9 +80,10 @@ export default class GridConfig extends HTMLElement {
             return tr;
         };
         const genCell = (num: number): HTMLTableCellElement => {
-            const th = document.createElement('td');
-            th.textContent = num.toString();
-            return th
+            const td = document.createElement('td');
+            td.textContent = num.toString();
+            td.style.fontSize = `${this.fontSize.valueAsNumber}px`;
+            return td
         }
 
         const newRows = [...Array(rows).keys()].flatMap(i => genRow(i));
