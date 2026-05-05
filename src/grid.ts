@@ -87,7 +87,6 @@ export default class GridConfig extends HTMLElement {
         };
         const genCell = (): HTMLTableCellElement => {
             const td = document.createElement('td');
-            td.textContent = num.toString();
             td.style.fontSize = `${this.fontSize.valueAsNumber}px`;
             return td
         }
