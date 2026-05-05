@@ -28,14 +28,14 @@ class GameState {
 
     public advance(clicked: number): ActionResult {
         let res = ActionResult.Wrong;
-        if (this.current + 1 == clicked) {
+        if (this.current + 1 === clicked) {
             this.current++;
             res = ActionResult.Right;
         }
-        if (this.current == 1) {
+        if (this.current === 1) {
             stats.startStopWatch();
         }
-        if (this.current == this.max) {
+        if (this.current === this.max) {
             res = ActionResult.Won;
             stats.recordAttempt();
         } else {
@@ -54,7 +54,7 @@ const gridClickOn = (obj: HTMLTableCellElement): void => {
     const n = Number(obj.textContent);
     const res = currState.advance(n);
 
-    if (res == ActionResult.Wrong) {
+    if (res === ActionResult.Wrong) {
         if (colorize.checked) {
             obj.animate([{ backgroundColor: '#fb4934' }, { backgroundColor: '#282828' }], {
                 easing: 'ease-out',
@@ -73,7 +73,7 @@ const gridClickOn = (obj: HTMLTableCellElement): void => {
         obj.classList.add('past');
     }
 
-    if (res == ActionResult.Right && randomize.checked) {
+    if (res === ActionResult.Right && randomize.checked) {
         grid.shuffleGrid();
     }
 }
