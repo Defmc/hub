@@ -48,7 +48,12 @@ class GameState {
 
 
 const gridClickOn = (obj: HTMLTableCellElement): void => {
-    const res = currState.advance(Number(obj.textContent));
+    if (obj.classList.contains('past')) {
+        return
+    }
+    const n = Number(obj.textContent);
+    const res = currState.advance(n);
+
     if (res == ActionResult.Wrong) {
         if (colorize.checked) {
             obj.animate([{ backgroundColor: '#fb4934' }, { backgroundColor: '#282828' }], {
@@ -64,7 +69,7 @@ const gridClickOn = (obj: HTMLTableCellElement): void => {
             duration: 300
         })
     }
-    if (disabled.checked && Number(obj.textContent) <= currState.current) {
+    if (disabled.checked && n <= currState.current) {
         obj.classList.add('past');
     }
 
