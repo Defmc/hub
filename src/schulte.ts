@@ -64,6 +64,9 @@ const gridClickOn = (obj: HTMLTableCellElement): void => {
             duration: 300
         })
     }
+    if (disabled.checked && Number(obj.textContent) <= currState.current) {
+        obj.classList.add('past');
+    }
 
     if (res == ActionResult.Right && randomize.checked) {
         grid.shuffleGrid();
