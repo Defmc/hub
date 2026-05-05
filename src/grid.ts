@@ -44,8 +44,8 @@ export default class GridConfig extends HTMLElement {
             this.dispatchEvent(new CustomEvent('expand', { bubbles: true }));
         });
 
-        this.rows.addEventListener('change', this.regenerateGrid);
-        this.cols.addEventListener('change', this.regenerateGrid);
+        this.rows.addEventListener('change', () => this.dispatchEvent(new CustomEvent('expand', { bubbles: true })));
+        this.cols.addEventListener('change', () => this.dispatchEvent(new CustomEvent('expand', { bubbles: true })));
 
         this.paddingBar.oninput = () => {
             this.padding.valueAsNumber = this.paddingBar.valueAsNumber;
