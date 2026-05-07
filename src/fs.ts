@@ -1,22 +1,23 @@
 const filepath = document.getElementById('filepath-breadcrumb') as HTMLDivElement;
 const fileList = document.getElementById('entries') as HTMLTableElement;
 
-const url = "http://localhost:8080/fs";
-let current_path = [] as string[];
+let currentPath = [] as string[];
+
+const getUrl = () => {
+    const url = "http://localhost:8080/fs";
+    return `${url}/${currentPath.join('/')}`;
+}
 
 fileList.addEventListener('click', async (e: Event) => {
-    let entry = (e.target as HTMLElement).closest('tr')?.dataset.name ?? '';
+    const entry = (e.target as HTMLElement).closest('tr')?.dataset.name ?? '';
 
-    if (entry[entry.length - 1] !== '/') {
-        current_path.push(entry);
-        window.location.href = `${url}/${current_path.join('/')}`;
-        return;
-    }
-
-    entry = entry.slice(0, -1);
-
-    if (entry === '..') {
-        current_path.pop();
+    if (entry.endsWith('/')) {
+        if (entry === '../') {
+            currentPath.pop();
+        } else {
+            currentPath.push(entry.slice(0, -1));
+        }
+        history.pushState({ path: [...currentPath] }, '', getUrl())
     } else {
         window.location.href = `${getUrl()}/${entry}`;
         return;
@@ -26,28 +27,26 @@ fileList.addEventListener('click', async (e: Event) => {
 })
 
 window.addEventListener('popstate', async (e: PopStateEvent) => {
-    current_path = e.state?.path ?? [];
+    currentPath = e.state?.path ?? [];
     await reqListUpdate();
 })
 
 const updatePath = () => {
     let list = [];
-    const sep = document.createElement('span');
-    sep.textContent = '/';
-    sep.dataset.curr = '0';
-    list.push(sep);
 
-    current_path.forEach((component, i) => {
-        console.log(component);
-        const comp = document.createElement('span');
-        comp.dataset.curr = i.toString();
-        comp.textContent = component;
-        list.push(comp)
+    const component = (pathComp: string, i: number) => {
+        console.log(`component for ${pathComp} index ${i}`);
+        const newComp = document.createElement('span');
+        newComp.textContent = pathComp + '/';
+        newComp.dataset.curr = i.toString();
+        newComp.classList.add('file-entry');
+        return newComp;
 
-        const sep = document.createElement('span');
-        sep.textContent = '/';
-        sep.dataset.curr = i.toString();
-        list.push(sep);
+    }
+    list.push(component('/', 0));
+
+    currentPath.forEach((pathComp, i) => {
+        list.push(component(pathComp, i + 1))
     });
 
     filepath.replaceChildren(...list);
@@ -56,9 +55,10 @@ const updatePath = () => {
 filepath.addEventListener('click', async (e: Event) => {
     const span = (e.target as HTMLElement).closest('span');
     const index = Number(span?.dataset.curr);
-    current_path = current_path.slice(0, index);
+    currentPath = currentPath.slice(0, index);
 
-    history.pushState({ path: [...current_path] }, '', `${url}/${current_path.join('/')}`)
+    history.pushState({ path: [...currentPath] }, '', getUrl())
+    await reqListUpdate();
 })
 
 const updateList = (entries: string[]) => {
@@ -67,6 +67,7 @@ const updateList = (entries: string[]) => {
         tr.dataset.name = entry;
         const filename = document.createElement('td');
         filename.textContent = entry;
+        filename.classList.add('file-entry');
         tr.appendChild(filename);
         return tr
     });
@@ -75,17 +76,17 @@ const updateList = (entries: string[]) => {
 }
 
 const reqListUpdate = async () => {
-    const reqUrl = `${url}/${current_path.join('/')}`;
+    const reqUrl = getUrl();
 
     try {
         const resp = await fetch(reqUrl);
         if (!resp.ok) {
-            throw new Error(`status: ${resp.status}`);
+            throw new Error(`status: ${resp.status} `);
         }
         const result = await resp.json();
-        console.log(result);
+        console.log(`reqListUpdate fetch: ${result} `);
         updatePath();
-        const entries = current_path.length > 0 ? ['../', ...result['entries']] : result['entries'];
+        const entries = currentPath.length > 0 ? ['../', ...result['entries']] : result['entries'];
         updateList(entries);
     } catch (error: any) {
         console.log(error.message)
