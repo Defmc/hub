@@ -1,13 +1,12 @@
 body {
     background-color: #1d2021;
     color: #ebdbb2;
-    font-family: sans-serif;
+    font-family: 'Courier New', monospace;
 }
 
 .file-entry {
     cursor: pointer;
     color: #ebdbb2;
-    display: block;
 }
 
 .file-entry:hover {
