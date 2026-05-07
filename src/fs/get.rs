@@ -1,11 +1,40 @@
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
 use axum::{
     body::Body,
+    extract,
     http::{HeaderMap, StatusCode, header},
     response::IntoResponse,
 };
 use tokio_util::io::ReaderStream;
+
+pub async fn get(path: Option<extract::Path<PathBuf>>) -> Result<impl IntoResponse, StatusCode> {
+    let path = if let Some(extract::Path(path)) = path {
+        path
+    } else {
+        PathBuf::from_str(".").unwrap()
+    };
+
+    println!("[info:get] getting for {path:?}");
+    let pwd = std::env::current_dir().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let target = pwd.join(path);
+    let path = tokio::fs::canonicalize(target)
+        .await
+        .map_err(|_| StatusCode::NOT_FOUND)?;
+
+    if !path.starts_with(&pwd) {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    if path.is_dir() {
+        Ok(dir(path, pwd).await?.into_response())
+    } else {
+        Ok(file(path).await?.into_response())
+    }
+}
 
 pub async fn file(path: impl AsRef<Path>) -> Result<impl IntoResponse, StatusCode> {
     let file = tokio::fs::File::open(&path)
