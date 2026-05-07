@@ -18,19 +18,15 @@ pub async fn get(path: Option<extract::Path<PathBuf>>) -> Result<impl IntoRespon
         PathBuf::from_str(".").unwrap()
     };
 
-    println!("[info:get] getting for {path:?}");
-    let pwd = std::env::current_dir().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    let target = pwd.join(path);
-    let path = tokio::fs::canonicalize(target)
-        .await
-        .map_err(|_| StatusCode::NOT_FOUND)?;
-
-    if !path.starts_with(&pwd) {
-        return Err(StatusCode::FORBIDDEN);
-    }
+    let path = super::sanitize(path).await?;
 
     if path.is_dir() {
-        Ok(dir(path, pwd).await?.into_response())
+        Ok(dir(
+            path,
+            std::env::current_dir().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?,
+        )
+        .await?
+        .into_response())
     } else {
         Ok(file(path).await?.into_response())
     }

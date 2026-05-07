@@ -5,6 +5,8 @@ use axum::{extract, http::StatusCode, response::IntoResponse};
 pub async fn delete(
     extract::Path(path): extract::Path<PathBuf>,
 ) -> Result<impl IntoResponse, StatusCode> {
+    let path = super::sanitize(path).await?;
+
     if path.is_file() {
         tokio::fs::remove_file(path)
             .await

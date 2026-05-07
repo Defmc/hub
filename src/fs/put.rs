@@ -13,13 +13,13 @@ pub async fn put(
     extract::Path(path): extract::Path<PathBuf>,
     req: Request,
 ) -> Result<impl IntoResponse, StatusCode> {
+    let path = super::sanitize(path).await?;
     let body = req
         .into_body()
         .into_data_stream()
         .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()));
 
     let mut stream = StreamReader::new(body);
-
     let mut file = tokio::fs::OpenOptions::new()
         .read(false)
         .write(true)
