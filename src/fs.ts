@@ -43,7 +43,7 @@ const updatePath = () => {
         return newComp;
 
     }
-    list.push(component('/', 0));
+    list.push(component('', 0));
 
     currentPath.forEach((pathComp, i) => {
         list.push(component(pathComp, i + 1))
