@@ -92,5 +92,7 @@ const reqListUpdate = async () => {
     }
 }
 
-history.pushState({ path: [...current_path] }, '', `${url}/${current_path.join('/')}`)
-reqListUpdate()
+document.addEventListener('DOMContentLoaded', async () => {
+    history.pushState({ path: [...currentPath] }, '', getUrl())
+    await reqListUpdate()
+})
