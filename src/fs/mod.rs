@@ -1,5 +1,6 @@
 use axum::{Router, routing};
 
+pub mod delete;
 pub mod get;
 pub mod post;
 
@@ -9,4 +10,5 @@ pub fn route() -> Router {
         .route("/fs/", routing::get(get::get))
         .route("/fs/{*path}", routing::post(post::post))
         .route("/fs/", routing::post(post::post))
+        .route("/fs/{*path}", routing::post(delete::delete))
 }
