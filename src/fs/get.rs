@@ -7,41 +7,43 @@ use axum::{
 };
 use tokio_util::io::ReaderStream;
 
-pub async fn file(path: impl AsRef<Path>) -> impl IntoResponse {
-    let file = tokio::fs::File::open(&path).await.unwrap();
+pub async fn file(path: impl AsRef<Path>) -> Result<impl IntoResponse, StatusCode> {
+    let file = tokio::fs::File::open(&path)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
     let stream = ReaderStream::new(file);
     let body = Body::from_stream(stream);
     let mime = mime_guess::from_path(path)
         .first_or_octet_stream()
         .to_string();
     let headers = HeaderMap::from_iter([(header::CONTENT_TYPE, mime.parse().unwrap())].into_iter());
-    (headers, body)
+    Ok((headers, body))
 }
 
-pub async fn dir(path: impl AsRef<Path>, pwd: PathBuf) -> impl IntoResponse {
-    let (okay, errs) =
-        path.as_ref()
-            .read_dir()
-            .unwrap()
-            .fold((Vec::new(), Vec::new()), |(mut ok, mut er), d| {
-                match d {
-                    Ok(dir) => {
-                        let path = dir.path();
-                        let mut filename = path.file_name().unwrap().to_string_lossy().to_string();
-                        if path.is_dir() {
-                            filename.push('/')
-                        }
-                        ok.push(filename)
-                    }
-                    Err(e) => er.push(e.to_string()),
+pub async fn dir(path: impl AsRef<Path>, pwd: PathBuf) -> Result<impl IntoResponse, StatusCode> {
+    let (mut okay, mut errs) = (Vec::new(), Vec::new());
+    let mut entries = tokio::fs::read_dir(path.as_ref())
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    loop {
+        let d = entries.next_entry().await;
+        match d {
+            Ok(Some(dir)) => {
+                let path = dir.path();
+                let mut filename = path.file_name().unwrap().to_string_lossy().to_string();
+                if path.is_dir() {
+                    filename.push('/')
                 }
-                (ok, er)
-            });
+                okay.push(filename)
+            }
+            Ok(None) => break,
+            Err(e) => errs.push(e.to_string()),
+        }
+    }
 
     let current = path.as_ref().strip_prefix(pwd).unwrap();
-    return (
-        StatusCode::OK,
-        axum::Json(serde_json::json!({"pwd": current, "entries": okay, "errors": errs })),
-    )
-        .into_response();
+    Ok(axum::Json(
+        serde_json::json!({"pwd": current, "entries": okay, "errors": errs }),
+    ))
 }
