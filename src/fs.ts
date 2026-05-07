@@ -53,7 +53,7 @@ const updatePath = () => {
     filepath.replaceChildren(...list);
 }
 
-fileList.addEventListener('click', (e: Event) => {
+filepath.addEventListener('click', async (e: Event) => {
     const span = (e.target as HTMLElement).closest('span');
     const index = Number(span?.dataset.curr);
     current_path = current_path.slice(0, index);
