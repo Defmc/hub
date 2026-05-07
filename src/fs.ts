@@ -18,10 +18,10 @@ fileList.addEventListener('click', async (e: Event) => {
     if (entry === '..') {
         current_path.pop();
     } else {
-        current_path.push(entry);
+        window.location.href = `${getUrl()}/${entry}`;
+        return;
     }
 
-    history.pushState({ path: [...current_path] }, '', `${url}/${current_path.join('/')}`)
     await reqListUpdate();
 })
 
