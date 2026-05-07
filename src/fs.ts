@@ -2,28 +2,28 @@ const filepath = document.getElementById('filepath-breadcrumb') as HTMLDivElemen
 const fileList = document.getElementById('entries') as HTMLTableElement;
 
 let currentPath = [] as string[];
+const ROOT_LABEL = '~';
 
-const getUrl = () => {
-    const url = "http://localhost:8080/fs";
-    return `${url}/${currentPath.join('/')}`;
+const getUrl = (extra?: string) => {
+    const BASE_URL = "http://localhost:8080/fs";
+    return [BASE_URL, ...currentPath, ...(extra ? [extra] : [''])].join('/');
 }
 
 fileList.addEventListener('click', async (e: Event) => {
     const entry = (e.target as HTMLElement).closest('tr')?.dataset.name ?? '';
+    if (!entry) return;
 
-    if (entry.endsWith('/')) {
-        if (entry === '../') {
-            currentPath.pop();
-        } else {
-            currentPath.push(entry.slice(0, -1));
-        }
-        history.pushState({ path: [...currentPath] }, '', getUrl())
-    } else {
-        window.location.href = `${getUrl()}/${entry}`;
+    if (!entry.endsWith('/')) {
+        window.location.href = getUrl(entry);
         return;
     }
+    if (entry === '../') {
+        currentPath.pop();
+    } else {
+        currentPath.push(entry.slice(0, -1));
+    }
 
-    await reqListUpdate();
+    await navigate(currentPath)
 })
 
 window.addEventListener('popstate', async (e: PopStateEvent) => {
@@ -43,7 +43,7 @@ const updatePath = () => {
         return newComp;
 
     }
-    list.push(component('', 0));
+    list.push(component(ROOT_LABEL, 0));
 
     currentPath.forEach((pathComp, i) => {
         list.push(component(pathComp, i + 1))
@@ -55,11 +55,14 @@ const updatePath = () => {
 filepath.addEventListener('click', async (e: Event) => {
     const span = (e.target as HTMLElement).closest('span');
     const index = Number(span?.dataset.curr);
-    currentPath = currentPath.slice(0, index);
+    await navigate(currentPath.slice(0, index))
+})
 
+const navigate = async (newPath: string[]) => {
+    currentPath = newPath;
     history.pushState({ path: [...currentPath] }, '', getUrl())
     await reqListUpdate();
-})
+}
 
 const updateList = (entries: string[]) => {
     const list = entries.map(entry => {
@@ -88,12 +91,11 @@ const reqListUpdate = async () => {
         updatePath();
         const entries = currentPath.length > 0 ? ['../', ...result['entries']] : result['entries'];
         updateList(entries);
-    } catch (error: any) {
-        console.log(error.message)
+    } catch (error: unknown) {
+        console.log("[err] can't fetch directory listing ", error)
     }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    history.pushState({ path: [...currentPath] }, '', getUrl())
-    await reqListUpdate()
+    await navigate([])
 })
