@@ -11,6 +11,10 @@ use axum::{
 };
 use tokio_util::io::ReaderStream;
 
+pub async fn ui() -> Result<impl IntoResponse, StatusCode> {
+    file("public/fs.html").await
+}
+
 pub async fn get(path: Option<extract::Path<PathBuf>>) -> Result<impl IntoResponse, StatusCode> {
     let path = if let Some(extract::Path(path)) = path {
         path
