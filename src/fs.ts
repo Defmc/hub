@@ -17,6 +17,11 @@ const getUrl = (extra?: string) => {
     return [BASE_URL, ...currentPath, ...(extra ? [extra] : [''])].join('/');
 }
 
+const getUserUrl = (extra?: string) => {
+    const BASE_URL = "http://localhost:8080/fs";
+    return [BASE_URL, ...currentPath, ...(extra ? [extra] : [''])].join('/');
+}
+
 const CLICK_HANDLER: Record<string, (entry: string) => Promise<void>> = {
     'GET': async (entry: string) => {
         if (!entry) return;
@@ -87,7 +92,7 @@ filepath.addEventListener('click', async (e: Event) => {
 
 const navigate = async (newPath: string[]) => {
     currentPath = newPath;
-    history.pushState({ path: [...currentPath] }, '', getUrl())
+    history.pushState({ path: [...currentPath] }, '', getUserUrl())
     await reqListUpdate();
 }
 
