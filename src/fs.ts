@@ -8,7 +8,8 @@ enum HttpMethod {
     GET = "GET",
     POST = "POST",
     PUT = "PUT",
-    DELETE = "DELETE"
+    DELETE = "DELETE",
+    NOP = 'NOP'
 };
 
 const getUrl = (extra?: string) => {
@@ -37,7 +38,8 @@ const CLICK_HANDLER: Record<string, (entry: string) => Promise<void>> = {
     'PUT': async (_s: string) => {
     },
     'DELETE': async (_s: string) => {
-
+    },
+    'NOP': async (_s: string) => {
     }
 } as const;
 
@@ -102,9 +104,7 @@ const updateList = (entries: string[]) => {
     const list = entries.map(entry => {
         const tr = document.createElement('tr');
         tr.appendChild(getTd(entry, entry, HttpMethod.GET));
-        if (!entry.endsWith('/')) {
-            tr.appendChild(getTd(entry, 'mv', HttpMethod.PUT))
-        }
+        tr.appendChild(entry.endsWith('/') ? getTd('', '', HttpMethod.NOP) : getTd(entry, 'mv', HttpMethod.PUT));
         tr.appendChild(getTd(entry, 'rm', HttpMethod.DELETE))
         return tr
     });
