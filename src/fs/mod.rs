@@ -9,12 +9,13 @@ pub mod put;
 
 pub fn route() -> Router {
     Router::new()
-        .route("/fs/{*path}", routing::get(get::get))
-        .route("/fs/", routing::get(get::get))
-        .route("/fs/{*path}", routing::post(post::post))
-        .route("/fs/", routing::post(post::post))
-        .route("/fs/{*path}", routing::put(put::put))
-        .route("/fs/{*path}", routing::delete(delete::delete))
+        .route("/fs", routing::get(get::ui))
+        .route("/api/fs/{*path}", routing::get(get::get))
+        .route("/api/fs/", routing::get(get::get))
+        .route("/api/fs/{*path}", routing::post(post::post))
+        .route("/api/fs/", routing::post(post::post))
+        .route("/api/fs/{*path}", routing::put(put::put))
+        .route("/api/fs/{*path}", routing::delete(delete::delete))
 }
 
 pub async fn sanitize(path: PathBuf) -> Result<PathBuf, StatusCode> {
