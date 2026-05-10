@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Typing practice</title>
+    <script src="../dist/typo.js" defer></script>
+    <style>
+        body {
+            background-color: #1d2021;
+            color: #ebdbb2;
+            font-family: 'Courier New', monospace;
+        }
+
+        span {
+            font-size: 18px;
+            color: #bfae95;
+        }
+
+        .wrong-char {
+            color: #fb4934;
+            font-weight: bold;
+        }
+
+        .right-char {
+            color: #ebdbb2;
+            font-weight: bold;
+        }
+
+        .current {
+            position: relative;
+            color: #1d2021;
+        }
+
+        .current::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: #ebdbb2;
+            z-index: -1;
+            animation: 0.5s infinite ease-out alternate blink;
+        }
+
+        @keyframes blink {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <label for="font-size">font size: </label><input type="number" id="font-size">
+    <div id="typed"></div>
+</body>
+
+</html>
